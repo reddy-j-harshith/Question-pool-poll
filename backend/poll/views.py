@@ -5,11 +5,11 @@ from django.contrib.auth.models import User
 
 from rest_framework.decorators import api_view as view
 from rest_framework.decorators import permission_classes
-from rest_framework.permissions import AllowAny, isAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.http import JsonResponse
 
 from .models import Question
-from .Serializers import *
+from .serializers import *
 
 # Create your views here.
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -47,21 +47,21 @@ def register_user(request):
 
 # QUESTION
 @view(['GET'])
-@permission_classes([isAuthenticated])
+@permission_classes([IsAuthenticated])
 def get_questions(request):
     questions = Question.objects.all()
     serializer = QuestionSerializer(questions, many=True)
     return JsonResponse(serializer.data, safe=False)
 
 @view(['GET'])
-@permission_classes([isAuthenticated])
+@permission_classes([IsAuthenticated])
 def fetch_question(request, question_id):
     question = Question.objects.get(id=question_id)
     serializer = QuestionSerializer(question)
     return JsonResponse(serializer.data, safe=False)
 
 @view(['POST'])
-@permission_classes([isAuthenticated])
+@permission_classes([IsAuthenticated])
 def add_question(request):
     question_text = request.data.get("question_text")
     option_1 = request.data.get("option_1")
@@ -78,7 +78,7 @@ def add_question(request):
     return JsonResponse({"Message": "Question added successfully"}, status=201)
 
 @view(['PUT'])
-@permission_classes([isAuthenticated])
+@permission_classes([IsAuthenticated])
 def update_question(request, question_id):
     question = Question.objects.get(id=question_id)
     question_text = request.data.get("question_text")
@@ -103,7 +103,7 @@ def update_question(request, question_id):
     return JsonResponse({"Message": "Question updated successfully"}, status=200)
 
 @view(['DELETE'])
-@permission_classes([isAuthenticated])
+@permission_classes([IsAuthenticated])
 def delete_question(request, question_id):
     question = Question.objects.get(id=question_id)
     question.delete()
@@ -111,7 +111,7 @@ def delete_question(request, question_id):
     return JsonResponse({"Message": "Question deleted successfully"}, status=200)
 
 @view(['POST'])
-@permission_classes([isAuthenticated])
+@permission_classes([IsAuthenticated])
 def rate_question(request, question_id):
     question = Question.objects.get(id=question_id)
     user = request.user
@@ -127,7 +127,7 @@ def rate_question(request, question_id):
     return JsonResponse({"Message": "Question rated successfully"}, status=201)
 
 @view(['GET'])
-@permission_classes([isAuthenticated])
+@permission_classes([IsAuthenticated])
 def get_rating(request, question_id):
     question = Question.objects.get(id=question_id)
     ratings = Rating.objects.filter(question = question)
@@ -135,7 +135,7 @@ def get_rating(request, question_id):
     return JsonResponse(serializer.data, safe=False)
 
 @view(['UPDATE'])
-@permission_classes([isAuthenticated])
+@permission_classes([IsAuthenticated])
 def update_rating(request, rating_id):
     rating = Rating.objects.get(id=rating_id)
     rating = request.data.get("rating")
@@ -146,7 +146,7 @@ def update_rating(request, rating_id):
 
 # COMMENTS
 @view(['POST'])
-@permission_classes([isAuthenticated])
+@permission_classes([IsAuthenticated])
 def add_comment(request, question_id):
     question = Question.objects.get(id=question_id)
     user = request.user
@@ -158,7 +158,7 @@ def add_comment(request, question_id):
     return JsonResponse({"Message": "Comment added successfully"}, status=201)
 
 @view(['GET'])
-@permission_classes([isAuthenticated])
+@permission_classes([IsAuthenticated])
 def get_comments(request, question_id):
     question = Question.objects.get(id=question_id)
     comments = Comments.objects.filter(question = question)
@@ -166,7 +166,7 @@ def get_comments(request, question_id):
     return JsonResponse(serializer.data, safe=False)
 
 @view(['DELETE'])
-@permission_classes([isAuthenticated])
+@permission_classes([IsAuthenticated])
 def delete_comment(request, comment_id):
     comment = Comments.objects.get(id=comment_id)
     comment.delete()

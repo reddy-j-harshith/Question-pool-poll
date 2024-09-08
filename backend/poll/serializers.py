@@ -7,9 +7,10 @@ class QuestionSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class CommentSerializer(serializers.ModelSerializer):
+    user = serializers.StringRelatedField()
     class Meta:
         model = Comments
-        fields = '__all__'
+        fields = ['user', 'comment', 'pub_date']
 
 class RatingSerializer(serializers.ModelSerializer):
     class Meta:
