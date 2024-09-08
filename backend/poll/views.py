@@ -1,25 +1,20 @@
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-
 from django.contrib.auth.models import User
-
 from rest_framework.decorators import api_view as view
 from rest_framework.decorators import permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from django.http import JsonResponse
-
-from .models import Question
-from .serializers import *
+from .models import Question, Rating, Comments
+from .serializers import QuestionSerializer, RatingSerializer, CommentSerializer
 
 # Create your views here.
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
-
         token['username'] = user.username
         token['is_staff'] = user.is_staff
-
         return token
     
 class MyTokenObtainPairView(TokenObtainPairView):
@@ -30,17 +25,16 @@ class MyTokenObtainPairView(TokenObtainPairView):
 @view(['POST'])
 @permission_classes([AllowAny])
 def register_user(request):
-
     username = request.data.get("username")
     password = request.data.get("password")
     email = request.data.get("email")
 
-    user = User.objects.filter(username = username)
+    user = User.objects.filter(username=username)
 
     if user.exists():
         return JsonResponse({"Message": "User name already exists"}, status=409)
 
-    user = User.objects.create_user(username = username, password = password, email = email)
+    user = User.objects.create_user(username=username, password=password, email=email)
     user.save()
 
     return JsonResponse({"Message": "User created successfully"}, status=201)
@@ -72,7 +66,7 @@ def add_question(request):
     net_rating = request.data.get("net_rating")
     rated_count = request.data.get("rated_count")
 
-    question = Question.objects.create(question_text = question_text, option_1 = option_1, option_2 = option_2, option_3 = option_3, option_4 = option_4, correct_option = correct_option, net_rating = net_rating, rated_count = rated_count)
+    question = Question.objects.create(question_text=question_text, option_1=option_1, option_2=option_2, option_3=option_3, option_4=option_4, correct_option=correct_option, net_rating=net_rating, rated_count=rated_count)
     question.save()
 
     return JsonResponse({"Message": "Question added successfully"}, status=201)
@@ -115,9 +109,9 @@ def delete_question(request, question_id):
 def rate_question(request, question_id):
     question = Question.objects.get(id=question_id)
     user = request.user
-    rating = request.data.get("rating")
+    rating_value = request.data.get("rating")
 
-    rating = Rating.objects.create(question = question, user = user, rating = rating)
+    rating = Rating.objects.create(question=question, user=user, rating=rating_value)
     rating.save()
 
     question.net_rating = (question.net_rating * question.rated_count + rating.rating) / (question.rated_count + 1)
@@ -130,15 +124,16 @@ def rate_question(request, question_id):
 @permission_classes([IsAuthenticated])
 def get_rating(request, question_id):
     question = Question.objects.get(id=question_id)
-    ratings = Rating.objects.filter(question = question)
+    ratings = Rating.objects.filter(question=question)
     serializer = RatingSerializer(ratings, many=True)
     return JsonResponse(serializer.data, safe=False)
 
-@view(['UPDATE'])
+@view(['PUT'])
 @permission_classes([IsAuthenticated])
 def update_rating(request, rating_id):
     rating = Rating.objects.get(id=rating_id)
-    rating = request.data.get("rating")
+    rating_value = request.data.get("rating")
+    rating.rating = rating_value
     rating.save()
 
     return JsonResponse({"Message": "Rating updated successfully"}, status=200)
@@ -152,7 +147,7 @@ def add_comment(request, question_id):
     user = request.user
     comment_text = request.data.get("comment_text")
 
-    comment = Comments.objects.create(question = question, user = user, comment_text = comment_text)
+    comment = Comments.objects.create(question=question, user=user, comment_text=comment_text)
     comment.save()
 
     return JsonResponse({"Message": "Comment added successfully"}, status=201)
@@ -161,7 +156,7 @@ def add_comment(request, question_id):
 @permission_classes([IsAuthenticated])
 def get_comments(request, question_id):
     question = Question.objects.get(id=question_id)
-    comments = Comments.objects.filter(question = question)
+    comments = Comments.objects.filter(question=question)
     serializer = CommentSerializer(comments, many=True)
     return JsonResponse(serializer.data, safe=False)
 
