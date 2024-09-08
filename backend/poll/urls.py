@@ -22,4 +22,9 @@ urlpatterns = [
         path('add-comment/', add_comment, name='add_comment'),
         path('delete-comment/<int:comment_id>', delete_comment, name='delete_comment'),
         
+        # Rating
+        path('ratings/', get_rating, name='get_ratings'),
+        path('add-rating/', rate_question, name='add_rating'),
+        path('update-rating/<int:rating_id>', update_rating, name='update_rating'),
+
     ]
