@@ -126,6 +126,24 @@ def rate_question(request, question_id):
 
     return JsonResponse({"Message": "Question rated successfully"}, status=201)
 
+@view(['GET'])
+@permission_classes([isAuthenticated])
+def get_rating(request, question_id):
+    question = Question.objects.get(id=question_id)
+    ratings = Rating.objects.filter(question = question)
+    serializer = RatingSerializer(ratings, many=True)
+    return JsonResponse(serializer.data, safe=False)
+
+@view(['UPDATE'])
+@permission_classes([isAuthenticated])
+def update_rating(request, rating_id):
+    rating = Rating.objects.get(id=rating_id)
+    rating = request.data.get("rating")
+    rating.save()
+
+    return JsonResponse({"Message": "Rating updated successfully"}, status=200)
+
+
 # COMMENTS
 @view(['POST'])
 @permission_classes([isAuthenticated])
