@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
@@ -6,8 +5,11 @@ from django.contrib.auth.models import User
 
 from rest_framework.decorators import api_view as view
 from rest_framework.decorators import permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, isAuthenticated
 from django.http import JsonResponse
+
+from .models import Question
+from .Serializers import *
 
 # Create your views here.
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -23,6 +25,8 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
+
+# USER
 @view(['POST'])
 @permission_classes([AllowAny])
 def register_user(request):
@@ -40,3 +44,113 @@ def register_user(request):
     user.save()
 
     return JsonResponse({"Message": "User created successfully"}, status=201)
+
+# QUESTION
+@view(['GET'])
+@permission_classes([isAuthenticated])
+def get_questions(request):
+    questions = Question.objects.all()
+    serializer = QuestionSerializer(questions, many=True)
+    return JsonResponse(serializer.data, safe=False)
+
+@view(['GET'])
+@permission_classes([isAuthenticated])
+def fetch_question(request, question_id):
+    question = Question.objects.get(id=question_id)
+    serializer = QuestionSerializer(question)
+    return JsonResponse(serializer.data, safe=False)
+
+@view(['POST'])
+@permission_classes([isAuthenticated])
+def add_question(request):
+    question_text = request.data.get("question_text")
+    option_1 = request.data.get("option_1")
+    option_2 = request.data.get("option_2")
+    option_3 = request.data.get("option_3")
+    option_4 = request.data.get("option_4")
+    correct_option = request.data.get("correct_option")
+    net_rating = request.data.get("net_rating")
+    rated_count = request.data.get("rated_count")
+
+    question = Question.objects.create(question_text = question_text, option_1 = option_1, option_2 = option_2, option_3 = option_3, option_4 = option_4, correct_option = correct_option, net_rating = net_rating, rated_count = rated_count)
+    question.save()
+
+    return JsonResponse({"Message": "Question added successfully"}, status=201)
+
+@view(['PUT'])
+@permission_classes([isAuthenticated])
+def update_question(request, question_id):
+    question = Question.objects.get(id=question_id)
+    question_text = request.data.get("question_text")
+    option_1 = request.data.get("option_1")
+    option_2 = request.data.get("option_2")
+    option_3 = request.data.get("option_3")
+    option_4 = request.data.get("option_4")
+    correct_option = request.data.get("correct_option")
+    net_rating = request.data.get("net_rating")
+    rated_count = request.data.get("rated_count")
+
+    question.question_text = question_text
+    question.option_1 = option_1
+    question.option_2 = option_2
+    question.option_3 = option_3
+    question.option_4 = option_4
+    question.correct_option = correct_option
+    question.net_rating = net_rating
+    question.rated_count = rated_count
+    question.save()
+
+    return JsonResponse({"Message": "Question updated successfully"}, status=200)
+
+@view(['DELETE'])
+@permission_classes([isAuthenticated])
+def delete_question(request, question_id):
+    question = Question.objects.get(id=question_id)
+    question.delete()
+
+    return JsonResponse({"Message": "Question deleted successfully"}, status=200)
+
+@view(['POST'])
+@permission_classes([isAuthenticated])
+def rate_question(request, question_id):
+    question = Question.objects.get(id=question_id)
+    user = request.user
+    rating = request.data.get("rating")
+
+    rating = Rating.objects.create(question = question, user = user, rating = rating)
+    rating.save()
+
+    question.net_rating = (question.net_rating * question.rated_count + rating.rating) / (question.rated_count + 1)
+    question.rated_count += 1
+    question.save()
+
+    return JsonResponse({"Message": "Question rated successfully"}, status=201)
+
+# COMMENTS
+@view(['POST'])
+@permission_classes([isAuthenticated])
+def add_comment(request, question_id):
+    question = Question.objects.get(id=question_id)
+    user = request.user
+    comment_text = request.data.get("comment_text")
+
+    comment = Comments.objects.create(question = question, user = user, comment_text = comment_text)
+    comment.save()
+
+    return JsonResponse({"Message": "Comment added successfully"}, status=201)
+
+@view(['GET'])
+@permission_classes([isAuthenticated])
+def get_comments(request, question_id):
+    question = Question.objects.get(id=question_id)
+    comments = Comments.objects.filter(question = question)
+    serializer = CommentSerializer(comments, many=True)
+    return JsonResponse(serializer.data, safe=False)
+
+@view(['DELETE'])
+@permission_classes([isAuthenticated])
+def delete_comment(request, comment_id):
+    comment = Comments.objects.get(id=comment_id)
+    comment.delete()
+
+    return JsonResponse({"Message": "Comment deleted successfully"}, status=200)
