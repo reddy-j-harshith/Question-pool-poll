@@ -18,7 +18,7 @@ urlpatterns = [
         path('delete-question/<int:question_id>', delete_question, name='delete_question'),
 
         # Comment
-        path('comments/', get_comments, name='get_comments'),
+        path('comments/<int:question_id>/', get_comments, name='get_comments'),
         path('add-comment/', add_comment, name='add_comment'),
         path('delete-comment/<int:comment_id>', delete_comment, name='delete_comment'),
         
@@ -26,5 +26,6 @@ urlpatterns = [
         path('ratings/', get_rating, name='get_ratings'),
         path('add-rating/', rate_question, name='add_rating'),
         path('update-rating/<int:rating_id>', update_rating, name='update_rating'),
+        path('get-net-ratings/', get_net_ratings, name='get_net_ratings'),
 
     ]

@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 
 from rest_framework.decorators import api_view as view
 from rest_framework.decorators import permission_classes
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from django.http import JsonResponse
 
 from .models import Question
@@ -172,3 +172,17 @@ def delete_comment(request, comment_id):
     comment.delete()
 
     return JsonResponse({"Message": "Comment deleted successfully"}, status=200)
+
+@view(['GET'])
+@permission_classes([IsAdminUser])
+def get_net_ratings(request):
+    questions = Question.objects.all()
+    rating_data = []
+    for question in questions:
+        question_data = {
+            'question_id': question.id,
+            'net_rating': question.net_rating,
+            'difficulty': question.difficulty
+        }
+        rating_data.append(question_data)
+    return JsonResponse(rating_data, safe=False)

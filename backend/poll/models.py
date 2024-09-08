@@ -13,6 +13,7 @@ class Question(models.Model):
     correct_option = models.DecimalField(max_digits=1, decimal_places=0)
     net_rating = models.DecimalField(max_digits=2, decimal_places=1)
     rated_count = models.IntegerField(default=0)
+    difficulty = models.CharField(max_length=30)
 
     def __str__(self):
         return self.question_text
