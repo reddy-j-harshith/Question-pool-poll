@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import './HomePage.css';
-import Toolbar from './Toolbar';
 import Config from '../Config';
 import AuthContext from './AuthContext';
 
@@ -45,7 +44,6 @@ function HomePage() {
 
   return (
     <div className="home-container">
-      <Toolbar />
       <div className="home-content">
         <h1>Questions</h1>
         <table className="questions-table">
