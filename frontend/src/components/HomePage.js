@@ -6,14 +6,13 @@ import AuthContext from './AuthContext';
 
 function HomePage() {
   const [questions, setQuestions] = useState([]);
-  const { authTokens } = useContext(AuthContext);
+  const { authTokens, user } = useContext(AuthContext);
   const [difficultyValues, setDifficultyValues] = useState([]);
 
   useEffect(() => {
-    // Fetch questions from the backend when the component mounts
-    const fetchQuestions = async () => {
+    const fetchQuestionsAndRatings = async () => {
       try {
-        const response = await fetch(`${Config.baseURL}/api/questions/`, { // Updated URL
+        const response = await fetch(`${Config.baseURL}/api/questions/`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -23,9 +22,20 @@ function HomePage() {
 
         if (response.ok) {
           const data = await response.json();
-          console.log('Fetched questions:', data); // Log data to check the response
           setQuestions(data);
-          setDifficultyValues(data.map(() => 1)); // Initialize difficulty values
+
+          const ratingsPromises = data.map(question =>
+            fetch(`${Config.baseURL}/api/get_ratings/${question.id}/${user.user_id}/`, {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authTokens?.access}`
+              },
+            }).then(res => res.ok ? res.json() : null)
+          );
+
+          const ratings = await Promise.all(ratingsPromises);
+          setDifficultyValues(ratings.map(rating => rating ? rating.rating : 1));
         } else {
           console.error('Failed to fetch questions:', response.status);
         }
@@ -34,14 +44,35 @@ function HomePage() {
       }
     };
 
-    fetchQuestions();
-  }, [authTokens]);
+    fetchQuestionsAndRatings();
+  }, [authTokens, user]);
 
-  const handleDifficultyChange = (index, value) => {
+  const handleDifficultyChange = async (index, value) => {
+    const questionId = questions[index].id;
     const newValues = [...difficultyValues];
     newValues[index] = value;
     setDifficultyValues(newValues);
-  };
+
+    try {
+      const ratingResponse = await fetch(`${Config.baseURL}/api/add-rating/${questionId}/${user.user_id}/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authTokens?.access}`
+        },
+        body: JSON.stringify({ rating: parseFloat(value) }),  // Ensure rating is a float
+      });
+
+      if (ratingResponse.ok) {
+        const ratingData = await ratingResponse.json();
+        // Optionally handle response
+      } else {
+        console.error('Error updating rating:', ratingResponse.status);
+      }
+    } catch (error) {
+      console.error('Failed to update rating:', error);
+    }
+};
 
   return (
     <div className="home-container">
@@ -61,39 +92,33 @@ function HomePage() {
           </thead>
           <tbody>
             {questions.map((question, index) => (
-              question.id ? ( // Ensure question.id exists
-                <tr key={question.id} className={index % 2 === 0 ? 'even-row' : 'odd-row'}>
-                  <td>{index + 1}</td>
-                  <td>
-                    <Link to={`/question/${question.id}`}>{question.question_name}</Link>
-                  </td>
-                  <td>{question.subject}</td>
-                  <td>{question.topic}</td>
-                  <td>{question.correct_option}</td>
-                  <td>
-                    <div className="difficulty-meter">
-                      <input
-                        type="range"
-                        min="1.0"
-                        max="10.0"
-                        className="difficulty-input"
-                        value={difficultyValues[index]}
-                        onChange={(e) => handleDifficultyChange(index, e.target.value)}
-                      />
-                      <span className="difficulty-number">{difficultyValues[index]}</span>
-                    </div>
-                  </td>
-                  <td className="actions-cell">
-                    <Link to={`/comments/${question.id}`}>
-                      <button className="comment-button">Comment</button>
-                    </Link>
-                  </td>
-                </tr>
-              ) : (
-                <tr key={index} className={index % 2 === 0 ? 'even-row' : 'odd-row'}>
-                  <td colSpan="7">Invalid question data</td>
-                </tr>
-              )
+              <tr key={question.id} className={index % 2 === 0 ? 'even-row' : 'odd-row'}>
+                <td>{index + 1}</td>
+                <td>
+                  <Link to={`/question/${question.id}`}>{question.question_name}</Link>
+                </td>
+                <td>{question.subject}</td>
+                <td>{question.topic}</td>
+                <td>{question.correct_option}</td>
+                <td>
+                  <div className="difficulty-meter">
+                    <input
+                      type="range"
+                      min="1.0"
+                      max="10.0"
+                      className="difficulty-input"
+                      value={difficultyValues[index]}
+                      onChange={(e) => handleDifficultyChange(index, parseFloat(e.target.value))}
+                    />
+                    <span className="difficulty-number">{difficultyValues[index]}</span>
+                  </div>
+                </td>
+                <td className="actions-cell">
+                  <Link to={`/comments/${question.id}`}>
+                    <button className="comment-button">Comment</button>
+                  </Link>
+                </td>
+              </tr>
             ))}
           </tbody>
         </table>

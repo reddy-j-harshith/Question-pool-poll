@@ -1,5 +1,7 @@
+from decimal import Decimal
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User
 from rest_framework.decorators import api_view as view
 from rest_framework.decorators import permission_classes
@@ -96,41 +98,65 @@ def delete_question(request, question_id):
 
     return JsonResponse({"Message": "Question deleted successfully"}, status=200)
 
+
 @view(['POST'])
 @permission_classes([IsAuthenticated])
-def rate_question(request, question_id):
-    question = Question.objects.get(id=question_id)
-    user = request.user
-    rating_value = request.data.get("rating")
+def rate_question(request, question_id, user_id):
+    try:
+        question = Question.objects.get(id=question_id)
+        user = User.objects.get(id=user_id)
 
-    rating = Rating.objects.create(question=question, user=user, rating=rating_value)
-    rating.save()
+        # Check if rating is provided in the request data
+        rating_value = request.data.get("rating")
+        if rating_value is None:
+            return JsonResponse({"Error": "Rating value is required"}, status=400)
 
-    question.net_rating = (question.net_rating * question.rated_count + rating.rating) / (question.rated_count + 1)
-    question.rated_count += 1
-    question.save()
+        try:
+            rating_value = Decimal(rating_value)  # Convert rating_value to Decimal
+        except ValueError:
+            return JsonResponse({"Error": "Invalid rating value"}, status=400)
 
-    return JsonResponse({"Message": "Question rated successfully"}, status=201)
+        # Check if a rating already exists for this question and user
+        try:
+            rating = Rating.objects.get(question=question, user=user)
+            # Update the net_rating by removing the old rating and adding the new one
+            question.net_rating = (question.net_rating * question.rated_count - rating.rating + rating_value) / question.rated_count
+            rating.rating = rating_value  # Update the existing rating
+        except Rating.DoesNotExist:
+            # If the rating does not exist, create a new one
+            rating = Rating(question=question, user=user, rating=rating_value)
+            # Calculate the new net rating for the question
+            question.net_rating = (question.net_rating * question.rated_count + rating_value) / (question.rated_count + 1)
+            question.rated_count += 1  # Increment the rated count for new rating
+
+        # Save the rating
+        rating.save()
+
+        # Save the updated question
+        question.save()
+
+        return JsonResponse({"Message": "Question rated successfully"}, status=201)
+
+    except Question.DoesNotExist:
+        return JsonResponse({"Error": "Question not found"}, status=404)
+    except User.DoesNotExist:
+        return JsonResponse({"Error": "User not found"}, status=404)
+    except Exception as e:
+        return JsonResponse({"Error": str(e)}, status=500)
 
 @view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_user_ratings(request, question_id, user_id):
-    question = Question.objects.get(id=question_id)
-    user = User.objects.get(id=user_id)
-    rating = Rating.objects.get(question=question, user=user)
+    try:
+        question = Question.objects.get(id=question_id)
+        user = User.objects.get(id=user_id)
+        rating = Rating.objects.get(question=question, user=user)
+    except ObjectDoesNotExist:
+        # Return a generic rating if no record exists
+        rating = Rating(question=question, user=user, rating=1.0)  # Example default rating
+
     serializer = RatingSerializer(rating)
     return JsonResponse(serializer.data, safe=False)
-
-@view(['PUT'])
-@permission_classes([IsAuthenticated])
-def update_rating(request, rating_id):
-    rating = Rating.objects.get(id=rating_id)
-    rating_value = request.data.get("rating")
-    rating.rating = rating_value
-    rating.save()
-
-    return JsonResponse({"Message": "Rating updated successfully"}, status=200)
-
 
 # COMMENTS
 @view(['POST'])
