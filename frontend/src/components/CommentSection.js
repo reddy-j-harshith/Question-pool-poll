@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import Config from '../Config'; // Import your configuration for the baseURL
 import './CommentSection.css';
+import AuthContext from './AuthContext';
 
 function CommentSection({ questionId }) {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
+  const { authTokens } = useContext(AuthContext);
 
   useEffect(() => {
     // Fetch comments when the component mounts
@@ -14,8 +16,7 @@ function CommentSection({ questionId }) {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            // Include your authorization header if needed
-            // 'Authorization': `Bearer ${yourToken}`
+            'Authorization': `Bearer ${authTokens?.access}`,
           },
         });
 
@@ -40,14 +41,13 @@ function CommentSection({ questionId }) {
   const handleCommentSubmit = async () => {
     if (newComment) {
       try {
-        const response = await fetch(`${Config.baseURL}/api/add-comment/${questionId}/`, { // Updated URL
+        const response = await fetch(`${Config.baseURL}/api/add-comment/${questionId}/`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            // Include your authorization header if needed
-            // 'Authorization': `Bearer ${yourToken}`
+            'Authorization': `Bearer ${authTokens?.access}`,
           },
-          body: JSON.stringify({ comment_text: newComment }), // Adjust the key to match your backend
+          body: JSON.stringify({ comment_text: newComment }),
         });
 
         if (response.ok) {
@@ -69,7 +69,7 @@ function CommentSection({ questionId }) {
       <div className="comments-list">
         {comments.map(comment => (
           <div className="comment" key={comment.id}>
-            {comment.comment_text} {/* Adjust the key to match your backend */}
+            {comment.comment_text}
           </div>
         ))}
       </div>

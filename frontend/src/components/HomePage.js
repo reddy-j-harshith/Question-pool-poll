@@ -67,13 +67,13 @@ function HomePage() {
                 </td>
                 <td>{question.subject}</td>
                 <td>{question.topic}</td>
-                <td>{question.correct_answer}</td>
+                <td>{question.correct_option}</td>
                 <td>
                   <div className="difficulty-meter">
                     <input
                       type="range"
-                      min="1"
-                      max="10"
+                      min="1.0"
+                      max="10.0"
                       className="difficulty-input"
                       value={difficultyValues[index]}
                       onChange={(e) => handleDifficultyChange(index, e.target.value)}

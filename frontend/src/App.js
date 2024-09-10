@@ -9,7 +9,7 @@ import ProfilePage from './components/ProfilePage';
 import CommentSection from './components/CommentSection';
 import { AuthProvider } from './components/AuthContext';
 import AuthContext from './components/AuthContext';
-import Toolbar from './Toolbar';
+import Toolbar from './components/Toolbar';
 
 // ProtectedRoute component to restrict access based on role
 const ProtectedRoute = ({ children, role }) => {
