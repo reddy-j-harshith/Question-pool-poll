@@ -24,7 +24,7 @@ urlpatterns = [
     path('delete-comment/<int:comment_id>/', delete_comment, name='delete_comment'),
 
     # Rating
-    path('ratings/<int:question_id>/', get_rating, name='get_rating'),
+    path('get_ratings/<int:question_id>/<int:user_id>/', get_user_ratings, name='get_rating'),
     path('add-rating/<int:question_id>/', rate_question, name='add_rating'),
     path('update-rating/<int:rating_id>/', update_rating, name='update_rating'),
     path('get-net-ratings/', get_net_ratings, name='get_net_ratings'),

@@ -114,10 +114,11 @@ def rate_question(request, question_id):
 
 @view(['GET'])
 @permission_classes([IsAuthenticated])
-def get_rating(request, question_id):
+def get_user_ratings(request, question_id, user_id):
     question = Question.objects.get(id=question_id)
-    ratings = Rating.objects.filter(question=question)
-    serializer = RatingSerializer(ratings, many=True)
+    user = User.objects.get(id=user_id)
+    rating = Rating.objects.get(question=question, user=user)
+    serializer = RatingSerializer(rating)
     return JsonResponse(serializer.data, safe=False)
 
 @view(['PUT'])
