@@ -1,0 +1,28 @@
+/* ReviewPage.css */
+.review-page-container {
+  padding: 20px;
+}
+
+.questions-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+.questions-table th, .questions-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+.questions-table th {
+  background-color: #f4f4f4;
+  text-align: left;
+}
+
+.even-row {
+  background-color: #f9f9f9;
+}
+
+.odd-row {
+  background-color: #fff;
+}
