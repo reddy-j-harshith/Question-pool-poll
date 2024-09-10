@@ -8,8 +8,9 @@ function QuestionPage() {
   const { id } = useParams(); // Get the question ID from the URL
   const [questionData, setQuestionData] = useState(null);
   const [totalQuestions, setTotalQuestions] = useState(10); // Replace with actual total question count from backend
+  const [difficultyValue, setDifficultyValue] = useState(1); // State for the difficulty slider
   const navigate = useNavigate();
- const { authTokens } = useContext(AuthContext);
+  const { authTokens, user } = useContext(AuthContext);
 
   // Fetch the question data based on ID
   useEffect(() => {
@@ -31,6 +32,28 @@ function QuestionPage() {
         }
       } catch (error) {
         console.error('Error fetching question data:', error);
+      }
+    };
+
+    // Fetch the current difficulty rating
+    const fetchDifficultyRating = async () => {
+      try {
+        const response = await fetch(`${Config.baseURL}/api/get_ratings/${id}/${user.user_id}/`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authTokens?.access}`
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setDifficultyValue(data.rating || 1);
+        } else {
+          console.error('Failed to fetch difficulty rating:', response.status);
+        }
+      } catch (error) {
+        console.error('Error fetching difficulty rating:', error);
       }
     };
 
@@ -58,8 +81,33 @@ function QuestionPage() {
     };
 
     fetchQuestionData();
+    fetchDifficultyRating();
     fetchTotalQuestions();
-  }, [id]);
+  }, [id, authTokens, user]);
+
+  const handleDifficultyChange = async (value) => {
+    setDifficultyValue(value);
+
+    try {
+      const ratingResponse = await fetch(`${Config.baseURL}/api/add-rating/${id}/${user.user_id}/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authTokens?.access}`
+        },
+        body: JSON.stringify({ rating: parseFloat(value) }),  // Ensure rating is a float
+      });
+
+      if (ratingResponse.ok) {
+        const ratingData = await ratingResponse.json();
+        // Optionally handle response
+      } else {
+        console.error('Error updating rating:', ratingResponse.status);
+      }
+    } catch (error) {
+      console.error('Failed to update rating:', error);
+    }
+  };
 
   // Handlers for navigating to next and previous questions
   const handlePreviousQuestion = () => {
@@ -104,6 +152,22 @@ function QuestionPage() {
           The correct Answer: <strong>{questionData.correct_option}</strong>,{' '}
           {questionData[`option_${questionData.correct_option}`]}
         </p>
+      </div>
+
+      <div className="difficulty-section">
+        <h2>Rate Difficulty</h2>
+        <div className="difficulty-meter">
+          <input
+            type="range"
+            min="0.1"
+            max="10.0"
+            step="0.1"
+            className="difficulty-input"
+            value={difficultyValue}
+            onChange={(e) => handleDifficultyChange(parseFloat(e.target.value))}
+          />
+          <span className="difficulty-number">{difficultyValue}</span>
+        </div>
       </div>
 
       <div className="actions-section">

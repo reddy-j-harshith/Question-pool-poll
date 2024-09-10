@@ -72,7 +72,7 @@ function HomePage() {
     } catch (error) {
       console.error('Failed to update rating:', error);
     }
-};
+  };
 
   return (
     <div className="home-container">
@@ -104,8 +104,9 @@ function HomePage() {
                   <div className="difficulty-meter">
                     <input
                       type="range"
-                      min="1.0"
+                      min="0.1"
                       max="10.0"
+                      step="0.1"
                       className="difficulty-input"
                       value={difficultyValues[index]}
                       onChange={(e) => handleDifficultyChange(index, parseFloat(e.target.value))}
