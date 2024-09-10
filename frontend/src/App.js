@@ -12,7 +12,7 @@ import AuthContext from './components/AuthContext';
 
 // ProtectedRoute component to restrict access based on role
 const ProtectedRoute = ({ children, role }) => {
-  const { user, admin, authTokens, loading } = useContext(AuthContext);
+  const { admin, authTokens, loading } = useContext(AuthContext);
 
   if (loading) return null; // Or a loading spinner/component
 

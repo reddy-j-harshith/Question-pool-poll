@@ -4,7 +4,7 @@ import Toolbar from './Toolbar';
 import AuthContext from './AuthContext';
 
 function ProfilePage() {
-  const { user, authTokens, updateUserProfile } = useContext(AuthContext);
+  const { user, updateUserProfile } = useContext(AuthContext);
 
   const [userDetails, setUserDetails] = useState({
     username: user?.username || '',
