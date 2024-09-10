@@ -27,7 +27,7 @@ class Comments(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
     comment_text = models.CharField(max_length=200)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    pub_date = models.DateTimeField('date published')
+    pub_date = models.DateTimeField('date published', default=timezone.now)
 
     def __str__(self):
         return self.comment_text

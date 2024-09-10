@@ -23,6 +23,7 @@ function HomePage() {
 
         if (response.ok) {
           const data = await response.json();
+          console.log('Fetched questions:', data); // Log data to check the response
           setQuestions(data);
           setDifficultyValues(data.map(() => 1)); // Initialize difficulty values
         } else {
@@ -34,7 +35,7 @@ function HomePage() {
     };
 
     fetchQuestions();
-  }, []);
+  }, [authTokens]);
 
   const handleDifficultyChange = (index, value) => {
     const newValues = [...difficultyValues];
@@ -60,33 +61,39 @@ function HomePage() {
           </thead>
           <tbody>
             {questions.map((question, index) => (
-              <tr key={question.id} className={index % 2 === 0 ? 'even-row' : 'odd-row'}>
-                <td>{index + 1}</td>
-                <td>
-                  <Link to={`/question/${question.id}`}>{question.question_name}</Link>
-                </td>
-                <td>{question.subject}</td>
-                <td>{question.topic}</td>
-                <td>{question.correct_option}</td>
-                <td>
-                  <div className="difficulty-meter">
-                    <input
-                      type="range"
-                      min="1.0"
-                      max="10.0"
-                      className="difficulty-input"
-                      value={difficultyValues[index]}
-                      onChange={(e) => handleDifficultyChange(index, e.target.value)}
-                    />
-                    <span className="difficulty-number">{difficultyValues[index]}</span>
-                  </div>
-                </td>
-                <td className="actions-cell">
-                  <Link to={`/comments/${question.id}`}>
-                    <button className="comment-button">Comment</button>
-                  </Link>
-                </td>
-              </tr>
+              question.id ? ( // Ensure question.id exists
+                <tr key={question.id} className={index % 2 === 0 ? 'even-row' : 'odd-row'}>
+                  <td>{index + 1}</td>
+                  <td>
+                    <Link to={`/question/${question.id}`}>{question.question_name}</Link>
+                  </td>
+                  <td>{question.subject}</td>
+                  <td>{question.topic}</td>
+                  <td>{question.correct_option}</td>
+                  <td>
+                    <div className="difficulty-meter">
+                      <input
+                        type="range"
+                        min="1.0"
+                        max="10.0"
+                        className="difficulty-input"
+                        value={difficultyValues[index]}
+                        onChange={(e) => handleDifficultyChange(index, e.target.value)}
+                      />
+                      <span className="difficulty-number">{difficultyValues[index]}</span>
+                    </div>
+                  </td>
+                  <td className="actions-cell">
+                    <Link to={`/comments/${question.id}`}>
+                      <button className="comment-button">Comment</button>
+                    </Link>
+                  </td>
+                </tr>
+              ) : (
+                <tr key={index} className={index % 2 === 0 ? 'even-row' : 'odd-row'}>
+                  <td colSpan="7">Invalid question data</td>
+                </tr>
+              )
             ))}
           </tbody>
         </table>

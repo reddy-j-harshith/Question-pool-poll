@@ -1,38 +1,40 @@
 import React, { useState, useEffect, useContext } from 'react';
+import { useParams } from 'react-router-dom';
 import Config from '../Config'; // Import your configuration for the baseURL
 import './CommentSection.css';
 import AuthContext from './AuthContext';
 
-function CommentSection({ questionId }) {
+function CommentSection() {
+  const { questionId } = useParams();
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
   const { authTokens } = useContext(AuthContext);
 
+  const fetchComments = async () => {
+    try {
+      const response = await fetch(`${Config.baseURL}/api/comments/${questionId}/`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authTokens?.access}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setComments(data);
+      } else {
+        console.error('Failed to fetch comments:', response.status);
+      }
+    } catch (error) {
+      console.error('Error fetching comments:', error);
+    }
+  };
+
   useEffect(() => {
     // Fetch comments when the component mounts
-    const fetchComments = async () => {
-      try {
-        const response = await fetch(`${Config.baseURL}/api/comments/${questionId}/`, { // Updated URL
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${authTokens?.access}`,
-          },
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setComments(data);
-        } else {
-          console.error('Failed to fetch comments:', response.status);
-        }
-      } catch (error) {
-        console.error('Error fetching comments:', error);
-      }
-    };
-
     fetchComments();
-  }, [questionId]);
+  }, [questionId, authTokens]);
 
   const handleCommentChange = (e) => {
     setNewComment(e.target.value);
@@ -51,9 +53,8 @@ function CommentSection({ questionId }) {
         });
 
         if (response.ok) {
-          const data = await response.json();
-          setComments([...comments, data]);
           setNewComment('');
+          fetchComments(); // Fetch the latest comments after submitting a new one
         } else {
           console.error('Failed to submit comment:', response.status);
         }

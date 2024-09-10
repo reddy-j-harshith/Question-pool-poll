@@ -10,7 +10,7 @@ class CommentSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField()
     class Meta:
         model = Comments
-        fields = ['user', 'comment', 'pub_date']
+        fields = '__all__'
 
 class RatingSerializer(serializers.ModelSerializer):
     class Meta:
