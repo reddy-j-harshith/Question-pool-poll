@@ -12,6 +12,11 @@ function Toolbar() {
     navigate('/login'); // Redirect to login page after logout
   };
 
+  // Only render the toolbar if the user is logged in
+  if (!user) {
+    return null;
+  }
+
   return (
     <nav className="toolbar">
       <ul className="toolbar-menu">
@@ -30,7 +35,7 @@ function Toolbar() {
             <button onClick={handleLogout} className="toolbar-link">Logout</button>
           </li>
         ) : (
-          <></> // No link or button for non-authenticated users
+          <></>
         )}
       </ul>
     </nav>

@@ -34,10 +34,12 @@ const LoginRoute = ({ children }) => {
 };
 
 function App() {
+
+
   return (
     <Router>
       <AuthProvider>
-        <Toolbar />
+      {true && <Toolbar />}
         <Routes>
           {/* Public routes */}
           <Route path="/register" element={<SignInPage />} />

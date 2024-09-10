@@ -115,7 +115,6 @@ function AdminPage() {
 
   return (
     <div className="admin-container">
-      <Toolbar />
       <div className="admin-content">
         <h1>Admin Page</h1>
         <div className="add-question-form">
