@@ -1,30 +1,29 @@
 import React, { useState, useContext } from 'react';
-import Toolbar from './Toolbar'; // Import the reusable toolbar
-import './AdminPage.css'; // Import the CSS for styling
-import Config from '../Config'; // Import your configuration for the baseURL
-import AuthContext from './AuthContext'; // Import the AuthContext for authentication tokens
+import Toolbar from './Toolbar';
+import './AdminPage.css';
+import Config from '../Config';
+import AuthContext from './AuthContext';
 
 function AdminPage() {
   const [newQuestion, setNewQuestion] = useState({
-    questionName: '',
-    questionDescription: '',
+    question_name: '',
+    question_description: '',
     subject: '',
     topic: '',
-    correctAnswer: '',
+    correct_option: '',
     options: ['', '', '', ''],
     difficulty: 'easy',
   });
   const [questions, setQuestions] = useState([]);
-  const { authTokens } = useContext(AuthContext); // Get authTokens from context
+  const { authTokens } = useContext(AuthContext);
 
   const handleAddQuestion = async () => {
-    // Validate that no field is empty
     if (
-      !newQuestion.questionName ||
-      !newQuestion.questionDescription ||
+      !newQuestion.question_name ||
+      !newQuestion.question_description ||
       !newQuestion.subject ||
       !newQuestion.topic ||
-      !newQuestion.correctAnswer ||
+      !newQuestion.correct_option ||
       newQuestion.options.some(option => !option.trim())
     ) {
       alert('All fields are required and options cannot be empty.');
@@ -32,25 +31,35 @@ function AdminPage() {
     }
 
     try {
-      const response = await fetch(`${Config.baseURL}/api/add-question/`, { // Update URL
+      const response = await fetch(`${Config.baseURL}/api/add-question/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authTokens?.access}`, // Ensure authTokens are available and valid
+          'Authorization': `Bearer ${authTokens?.access}`,
         },
-        body: JSON.stringify(newQuestion),
+        body: JSON.stringify({
+          question_name: newQuestion.question_name,
+          question_description: newQuestion.question_description,
+          subject: newQuestion.subject,
+          topic: newQuestion.topic,
+          correct_option: newQuestion.correct_option,
+          option_1: newQuestion.options[0],
+          option_2: newQuestion.options[1],
+          option_3: newQuestion.options[2],
+          option_4: newQuestion.options[3],
+          difficulty: newQuestion.difficulty,
+        }),
       });
 
       if (response.ok) {
         const data = await response.json();
-        // Optionally update local state or UI with the new question if needed
         setQuestions([...questions, { ...newQuestion, qNo: questions.length + 1 }]);
         setNewQuestion({
-          questionName: '',
-          questionDescription: '',
+          question_name: '',
+          question_description: '',
           subject: '',
           topic: '',
-          correctAnswer: '',
+          correct_option: '',
           options: ['', '', '', ''],
           difficulty: 'easy',
         });
@@ -67,10 +76,10 @@ function AdminPage() {
 
   const handleRemoveQuestion = async (questionId) => {
     try {
-      const response = await fetch(`${Config.baseURL}/api/delete-question/${questionId}/`, { // Update URL
+      const response = await fetch(`${Config.baseURL}/api/delete-question/${questionId}/`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${authTokens?.access}`, // Ensure authTokens are available and valid
+          'Authorization': `Bearer ${authTokens?.access}`,
         },
       });
 
@@ -113,14 +122,14 @@ function AdminPage() {
           <h2>Add Question</h2>
           <input
             type="text"
-            name="questionName"
-            value={newQuestion.questionName}
+            name="question_name"
+            value={newQuestion.question_name}
             placeholder="Question Name"
             onChange={handleChange}
           />
           <textarea
-            name="questionDescription"
-            value={newQuestion.questionDescription}
+            name="question_description"
+            value={newQuestion.question_description}
             placeholder="Question Description"
             onChange={handleChange}
           />
@@ -140,9 +149,9 @@ function AdminPage() {
           />
           <input
             type="text"
-            name="correctAnswer"
-            value={newQuestion.correctAnswer}
-            placeholder="Correct Answer"
+            name="correct_option"
+            value={newQuestion.correct_option}
+            placeholder="Correct Option"
             onChange={handleChange}
           />
           <input
@@ -199,32 +208,28 @@ function AdminPage() {
                   <th>Description</th>
                   <th>Subject</th>
                   <th>Topic</th>
-                  <th>Correct Answer</th>
-                  <th>Options</th>
                   <th>Difficulty</th>
-                  <th>Actions</th>
+                  <th>Action</th>
                 </tr>
               </thead>
               <tbody>
-                {questions.map((q) => (
-                  <tr key={q.qNo}>
-                    <td>{q.qNo}</td>
-                    <td>{q.questionName}</td>
-                    <td>{q.questionDescription}</td>
-                    <td>{q.subject}</td>
-                    <td>{q.topic}</td>
-                    <td>{q.correctAnswer}</td>
-                    <td>{q.options.join(', ')}</td>
-                    <td>{q.difficulty}</td>
+                {questions.map((question, index) => (
+                  <tr key={question.qNo}>
+                    <td>{question.qNo}</td>
+                    <td>{question.question_name}</td>
+                    <td>{question.question_description}</td>
+                    <td>{question.subject}</td>
+                    <td>{question.topic}</td>
+                    <td>{question.difficulty}</td>
                     <td>
-                      <button onClick={() => handleRemoveQuestion(q.qNo)}>Remove</button>
+                      <button onClick={() => handleRemoveQuestion(question.qNo)}>Remove</button>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           ) : (
-            <p>No questions to remove</p>
+            <p>No questions added yet.</p>
           )}
         </div>
       </div>

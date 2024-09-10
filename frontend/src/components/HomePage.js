@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import './HomePage.css';
 import Toolbar from './Toolbar';
-import Config from '../Config'; // Import your configuration for the baseURL
+import Config from '../Config';
+import AuthContext from './AuthContext';
 
 function HomePage() {
   const [questions, setQuestions] = useState([]);
+  const { authTokens } = useContext(AuthContext);
   const [difficultyValues, setDifficultyValues] = useState([]);
 
   useEffect(() => {
@@ -16,8 +18,7 @@ function HomePage() {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            // Include your authorization header if needed
-            // 'Authorization': `Bearer ${yourToken}`
+            'Authorization': `Bearer ${authTokens?.access}`
           },
         });
 

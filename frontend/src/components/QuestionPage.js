@@ -1,13 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import './QuestionPage.css';
-import Config from '../Config'; // Import your configuration for the baseURL
+import Config from '../Config';
+import AuthContext from './AuthContext';
 
 function QuestionPage() {
   const { id } = useParams(); // Get the question ID from the URL
   const [questionData, setQuestionData] = useState(null);
   const [totalQuestions, setTotalQuestions] = useState(10); // Replace with actual total question count from backend
   const navigate = useNavigate();
+ const { authTokens } = useContext(AuthContext);
 
   // Fetch the question data based on ID
   useEffect(() => {
@@ -17,8 +19,7 @@ function QuestionPage() {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            // Include your authorization header if needed
-            // 'Authorization': `Bearer ${yourToken}`
+            'Authorization': `Bearer ${authTokens?.access}`,
           },
         });
 
@@ -100,8 +101,8 @@ function QuestionPage() {
 
       <div className="correct-answer-section">
         <p>
-          The correct Answer: <strong>{questionData.correct_answer}</strong>,{' '}
-          {questionData[`option_${questionData.correct_answer}`]}
+          The correct Answer: <strong>{questionData.correct_option}</strong>,{' '}
+          {questionData[`option_${questionData.correct_option}`]}
         </p>
       </div>
 

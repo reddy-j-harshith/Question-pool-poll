@@ -16,21 +16,20 @@ const ProtectedRoute = ({ children, role }) => {
 
   if (loading) return null; // Or a loading spinner/component
 
-  // If not authenticated, redirect to login page
   if (!authTokens) {
     return <Navigate to="/login" />;
   }
 
-
-  // If a specific role is required and doesn't match, redirect to login page
-  
   if (role === 'admin' && !admin) {
     return <Navigate to="/login" />;
   }
 
-
-
   return children;
+};
+
+const LoginRoute = ({ children }) => {
+  let {user} = useContext(AuthContext)
+  return !user ? children : <Navigate to="/home" replace />;
 };
 
 function App() {
@@ -39,8 +38,16 @@ function App() {
       <AuthProvider>
         <Routes>
           {/* Public routes */}
-          <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<SignInPage />} />
+
+          <Route
+            path="/login"
+            element={
+              <LoginRoute>
+                <LoginPage />
+              </LoginRoute>
+            }
+          />
 
           {/* Protected routes */}
           <Route

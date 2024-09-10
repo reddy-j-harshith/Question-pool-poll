@@ -57,19 +57,11 @@ def fetch_question(request, question_id):
 @view(['POST'])
 @permission_classes([IsAuthenticated])
 def add_question(request):
-    question_text = request.data.get("question_text")
-    option_1 = request.data.get("option_1")
-    option_2 = request.data.get("option_2")
-    option_3 = request.data.get("option_3")
-    option_4 = request.data.get("option_4")
-    correct_option = request.data.get("correct_option")
-    net_rating = request.data.get("net_rating")
-    rated_count = request.data.get("rated_count")
-
-    question = Question.objects.create(question_text=question_text, option_1=option_1, option_2=option_2, option_3=option_3, option_4=option_4, correct_option=correct_option, net_rating=net_rating, rated_count=rated_count)
-    question.save()
-
-    return JsonResponse({"Message": "Question added successfully"}, status=201)
+    serializer = QuestionSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return JsonResponse({"message": "Question added successfully"}, status=201)
+    return JsonResponse(serializer.errors, status=400)
 
 @view(['PUT'])
 @permission_classes([IsAuthenticated])
