@@ -30,6 +30,10 @@ INSTALLED_APPS = [
     'corsheaders',
     'poll.apps.PollConfig',
     'rest_framework_simplejwt.token_blacklist',
+    'quiz',
+    'multichoice',
+    'true_false',
+    'essay',
 ]
 
 MIDDLEWARE = [
