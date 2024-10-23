@@ -39,6 +39,7 @@ class Rating(models.Model):
 
     def __str__(self):
         return str(self.rating)
+    
 
 # I am writing TestModels here
 
@@ -68,6 +69,7 @@ class TestStat(models.Model):
 
 # The QuestionAttempt model logs each user's interaction with a question during a test, including time taken, difficulty level, and whether the answer was correct.
 # It provides detailed data for analyzing individual question attempts and helps monitor live performance.
+#this is what we post to the user_stat page of the monitoring_page of a test
 class QuestionAttempt(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     test = models.ForeignKey(Test, on_delete=models.CASCADE)
@@ -78,3 +80,13 @@ class QuestionAttempt(models.Model):
 
     def __str__(self):
         return f"User: {self.user.username}, Question: {self.question.id}, Correct: {self.correct}"
+    
+#this is what we post to the main monitoring page of a test
+class TestStat(models.Model):
+    test = models.ForeignKey('Test', on_delete=models.CASCADE)  # Test reference
+    user = models.ForeignKey(User, on_delete=models.CASCADE)  # User reference
+    questions_attempted = models.IntegerField(default=0)  # Number of questions attempted
+    present_score = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)  # User's current score
+
+    def __str__(self):
+        return f"TestStat: Test {self.test.id} | User {self.user.username} | Score {self.present_score}"
