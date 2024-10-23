@@ -29,10 +29,10 @@ urlpatterns = [
     path('get-net-ratings/', get_net_ratings, name='get_net_ratings'),
 
     # Test
-    path('test/create', views.create_test, name='create_test'),
-    path('test/fetch-all', views.fetch_tests, name='fetch_tests'),
-    path('test/<int:test_id>/start', views.start_test, name='start_test'),
-    path('test/<int:test_id>/stop', views.stop_test, name='stop_test'),
+    path('test/create/', views.create_test, name='create_test'),
+    path('test/fetch-all/', views.fetch_tests, name='fetch_tests'),
+    path('test/<int:test_id>/start/', views.start_test, name='start_test'),
+    path('test/<int:test_id>/stop/', views.stop_test, name='stop_test'),
 
     # Monitoring
     path('test/<int:test_id>/monitor', views.monitor_test, name='monitor_test'),
