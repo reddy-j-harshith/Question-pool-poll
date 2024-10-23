@@ -208,7 +208,7 @@ def get_net_ratings(request):
 # API to create a new test with provided duration, subject, and topic.
 # Test is inactive by default when created.
 @view(['POST'])
-@permission_classes([IsAuthenticated])  # Admins or Teachers can create tests
+@permission_classes([IsAdmin])  # Admins or Teachers can create tests
 def create_test(request):
     duration = request.data.get("duration")
     subject = request.data.get("subject")
@@ -222,7 +222,7 @@ def create_test(request):
 
 # for test dashboard for admin. # Returns a list of all tests with basic information.
 @view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([PermitAll])
 def fetch_tests(request):
     tests = Test.objects.all()  # Fetch all test records
     test_data = [{"id": test.id, "subject": test.subject, "topic": test.topic, "active": test.active} for test in tests]
@@ -232,7 +232,7 @@ def fetch_tests(request):
 # # API to start a test by setting its active status to True.
 # Once active, students can begin taking the test.
 @view(['POST'])
-@permission_classes([IsAuthenticated])  # Can be restricted to Admin or Teachers
+@permission_classes([IsAdmin])  # Can be restricted to Admin or Teachers
 def start_test(request, test_id):
     try:
         test = Test.objects.get(id=test_id)
@@ -250,7 +250,7 @@ def start_test(request, test_id):
 # API to stop a test by setting its active status to False.
 # No further attempts are allowed once the test is stopped.
 @view(['POST'])
-@permission_classes([IsAuthenticated])  # Can be restricted to Admin or Teachers
+@permission_classes([IsAdmin])  # Can be restricted to Admin or Teachers
 def stop_test(request, test_id):
     try:
         test = Test.objects.get(id=test_id)
@@ -268,7 +268,7 @@ def stop_test(request, test_id):
 # API to monitor the progress of a test by retrieving statistics for all users.
 # Returns the number of questions attempted and current scores for each user.
 @view(['GET'])
-@permission_classes([IsAuthenticated])  # Can be restricted to Admin or Teachers
+@permission_classes([IsAdmin])  # Can be restricted to Admin or Teachers
 def monitor_test(request, test_id):
     try:
         test_stats = TestStat.objects.filter(test__id=test_id)  # Filter stats by test ID
@@ -287,7 +287,7 @@ def monitor_test(request, test_id):
 # API to get detailed stats for a specific user on a specific test.
 # Returns a list of question attempts with time taken and correctness.
 @view(['GET'])
-@permission_classes([IsAuthenticated])  # Can be restricted to Admin or Teachers
+@permission_classes([IsAdmin])  # Can be restricted to Admin or Teachers
 def student_stats(request, user_id, test_id):
     try:
         # Get all QuestionAttempt objects for the given user and test
