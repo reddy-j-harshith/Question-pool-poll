@@ -17,7 +17,17 @@ class RatingSerializer(serializers.ModelSerializer):
         model = Rating
         fields = '__all__'
 
-class UserSerializer(serializers.ModelSerializer):
+class TestStatSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
+        model = TestStat
+        fields = '__all__'
+
+class TestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Test
+        fields = '__all__'
+
+class QuestionAttemptSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = QuestionAttempt
         fields = '__all__'
