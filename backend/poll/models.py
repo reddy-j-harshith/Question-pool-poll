@@ -56,17 +56,6 @@ class Test(models.Model):
     def __str__(self):
         return f"{self.subject} - {self.topic} ({'Active' if self.active else 'Inactive'})"
 
-# The TestStat model tracks user performance on each test, storing the number of questions and the user's score.
-# This is useful for evaluating overall test results and user progress.
-class TestStat(models.Model):
-    test = models.ForeignKey(Test, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    number_of_questions = models.IntegerField()
-    score = models.DecimalField(max_digits=5, decimal_places=2, help_text="Total score achieved")
-
-    def __str__(self):
-        return f"Test: {self.test.id}, User: {self.user.username}, Score: {self.score}"
-
 # The QuestionAttempt model logs each user's interaction with a question during a test, including time taken, difficulty level, and whether the answer was correct.
 # It provides detailed data for analyzing individual question attempts and helps monitor live performance.
 #this is what we post to the user_stat page of the monitoring_page of a test
