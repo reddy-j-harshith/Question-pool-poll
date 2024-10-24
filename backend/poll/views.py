@@ -7,7 +7,7 @@ from rest_framework.decorators import api_view as view
 from rest_framework.decorators import permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from django.http import JsonResponse
-from .models import Question, Rating, Comments
+from .models import *
 from .serializers import QuestionSerializer, RatingSerializer, CommentSerializer
 
 # Create your views here.
@@ -200,3 +200,108 @@ def get_net_ratings(request):
         }
         rating_data.append(question_data)
     return JsonResponse(rating_data, safe=False)
+
+
+# looks fucking scary, well! let's see how i fare
+# TEST
+
+# API to create a new test with provided duration, subject, and topic.
+# Test is inactive by default when created.
+@view(['POST'])
+@permission_classes([IsAdminUser])  # Admins or Teachers can create tests
+def create_test(request):
+    duration = request.data.get("duration")
+    subject = request.data.get("subject")
+    topic = request.data.get("topic")
+
+    # Create a new test with the provided data, setting the active status to False by default
+    test = Test.objects.create(duration=duration, subject=subject, topic=topic, active=False, done=False)
+    test.save()
+
+    return JsonResponse({"message": "Test created successfully", "test_id": test.id}, status=201)
+
+# for test dashboard for admin. # Returns a list of all tests with basic information.
+@view(['GET'])
+@permission_classes([IsAdminUser])
+def fetch_tests(request):
+    tests = Test.objects.all()  # Fetch all test records
+    test_data = [{"id": test.id, "subject": test.subject, "topic": test.topic, "active": test.active, "completed": test.done} for test in tests]
+    
+    return JsonResponse(test_data, safe=False, status=200)
+
+# # API to start a test by setting its active status to True.
+# Once active, students can begin taking the test.
+@view(['POST'])
+@permission_classes([IsAdminUser])  # Can be restricted to Admin or Teachers
+def start_test(request, test_id):
+    try:
+        test = Test.objects.get(id=test_id)
+        if test.active:
+            return JsonResponse({"message": "Test is already active"}, status=400)
+
+        test.active = True
+        test.active = True
+        test.save()
+
+        return JsonResponse({"message": f"Test {test_id} started successfully"}, status=200)
+
+    except Test.DoesNotExist:
+        return JsonResponse({"error": "Test not found"}, status=404)
+    
+# API to stop a test by setting its active status to False.
+# No further attempts are allowed once the test is stopped.
+@view(['POST'])
+@permission_classes([IsAdminUser])  # Can be restricted to Admin or Teachers
+def stop_test(request, test_id):
+    try:
+        test = Test.objects.get(id=test_id)
+        if not test.active:
+            return JsonResponse({"message": "Test is already inactive"}, status=400)
+
+        test.active = False
+        test.save()
+
+        return JsonResponse({"message": f"Test {test_id} stopped successfully"}, status=200)
+
+    except Test.DoesNotExist:
+        return JsonResponse({"error": "Test not found"}, status=404)
+
+# API to monitor the progress of a test by retrieving statistics for all users.
+# Returns the number of questions attempted and current scores for each user.
+@view(['GET'])
+@permission_classes([IsAdminUser])  # Can be restricted to Admin or Teachers
+def monitor_test(request, test_id):
+    try:
+        test_stats = TestStat.objects.filter(test__id=test_id)  # Filter stats by test ID
+        data = [{
+            "user": stat.user.username,
+            "questions_attempted": stat.questions_attempted,
+            "present_score": stat.present_score
+        } for stat in test_stats]
+
+        return JsonResponse(data, safe=False, status=200)
+
+    except TestStat.DoesNotExist:
+        return JsonResponse({"error": "No stats found for this test"}, status=404)
+    
+
+# API to get detailed stats for a specific user on a specific test.
+# Returns a list of question attempts with time taken and correctness.
+@view(['GET'])
+@permission_classes([IsAdminUser])  # Can be restricted to Admin or Teachers
+def student_stats(request, user_id, test_id):
+    try:
+        # Get all QuestionAttempt objects for the given user and test
+        attempts = QuestionAttempt.objects.filter(user__id=user_id, test__id=test_id)
+
+        data = [{
+            "question": attempt.question.question_name,
+            "time_taken": attempt.time_taken,
+            "difficulty": attempt.difficulty,
+            "correct": attempt.correct
+        } for attempt in attempts]
+
+        return JsonResponse(data, safe=False, status=200)
+
+    except QuestionAttempt.DoesNotExist:
+        return JsonResponse({"error": "No attempts found for this user and test"}, status=404)
