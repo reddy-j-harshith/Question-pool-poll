@@ -8,6 +8,7 @@ from rest_framework.decorators import permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from django.http import JsonResponse
 from .models import *
+from .models import Test
 from .serializers import QuestionSerializer, RatingSerializer, CommentSerializer
 
 # Create your views here.
@@ -225,7 +226,7 @@ def create_test(request):
 @permission_classes([IsAdminUser])
 def fetch_tests(request):
     tests = Test.objects.all()  # Fetch all test records
-    test_data = [{"id": test.id, "subject": test.subject, "topic": test.topic, "active": test.active, "completed": test.done} for test in tests]
+    test_data = [{"id": test.id, "subject": test.subject, "topic": test.topic, "active": test.active} for test in tests]
     
     return JsonResponse(test_data, safe=False, status=200)
 

@@ -30,6 +30,11 @@ function Toolbar() {
             <Link to="/profile" className="toolbar-link">Profile</Link>
           </li>
         )}
+        {user?.is_staff && (
+          <li>
+            <Link to="/test" className="toolbar-link">Test</Link>
+          </li>
+        )}
         {user ? (
           <li>
             <button onClick={handleLogout} className="toolbar-link">Logout</button>

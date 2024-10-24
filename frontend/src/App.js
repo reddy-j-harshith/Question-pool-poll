@@ -10,6 +10,7 @@ import CommentSection from './components/CommentSection';
 import { AuthProvider } from './components/AuthContext';
 import AuthContext from './components/AuthContext';
 import Toolbar from './components/Toolbar';
+import TestList from './components/TestList';
 
 // ProtectedRoute component to restrict access based on role
 const ProtectedRoute = ({ children, role }) => {
@@ -52,6 +53,15 @@ function App() {
               </LoginRoute>
             }
           />
+
+          <Route
+            path="/test"
+            element={
+              <ProtectedRoute>
+                <TestList />
+              </ProtectedRoute>
+            }
+          />  
 
           {/* Protected routes */}
           <Route

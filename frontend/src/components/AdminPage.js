@@ -1,4 +1,5 @@
 import React, { useState, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Toolbar from './Toolbar';
 import './AdminPage.css';
 import Config from '../Config';
@@ -14,6 +15,8 @@ function AdminPage() {
     options: ['', '', '', ''],
     difficulty: 'easy',
   });
+
+  const nav = useNavigate()
   const [questions, setQuestions] = useState([]);
   const { authTokens } = useContext(AuthContext);
 
@@ -108,9 +111,47 @@ function AdminPage() {
     }
   };
 
-  const handleGetCSV = () => {
-    // Logic for generating CSV goes here
-    console.log("Get CSV clicked");
+  const handleTestNavigate = async () => {
+    nav("/test")
+  }
+
+  // Function to handle generating a CSV file
+  const handleGetCSV = async () => {
+    try {
+      const response = await fetch(`${Config.baseURL}/api/get-net-ratings/`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${authTokens?.access}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('CSV data:', data);
+
+        // Convert the data to CSV format
+        let csvContent = 'data:text/csv;charset=utf-8,';
+        csvContent += 'Question ID,Net Rating,Difficulty\n'; // Header row
+        data.forEach((row) => {
+          csvContent += `${row.question_id},${row.net_rating},${row.difficulty}\n`;
+        });
+
+        // Create a download link for the CSV file
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement('a');
+        link.setAttribute('href', encodedUri);
+        link.setAttribute('download', 'question_ratings.csv');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        const error = await response.json();
+        alert(`Failed to generate CSV: ${error.message}`);
+      }
+    } catch (error) {
+      console.error('Error generating CSV:', error);
+      alert('An error occurred while generating the CSV.');
+    }
   };
 
   return (
@@ -193,6 +234,7 @@ function AdminPage() {
           <div className="button-group">
             <button onClick={handleAddQuestion}>Add Question</button>
             <button className="get-csv-button" onClick={handleGetCSV}>Extract CSV</button>
+            <button className="get-difficulties-button" onClick={handleTestNavigate}>Tests</button>
           </div>
         </div>
 
