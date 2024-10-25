@@ -1,7 +1,8 @@
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
-
+from datetime import timedelta
+from datetime import datetime, timedelta 
 # Create your models here.
 
 
@@ -47,15 +48,24 @@ class Rating(models.Model):
 # The Test model stores metadata about each test, including duration, topic, subject, and whether the test is currently active.
 # It helps organize tests and allows the admin to activate/deactivate them when needed.
 class Test(models.Model):
-    # Automatically assigned ID for each test
     duration = models.IntegerField(help_text="Test duration in minutes")
-    topic = models.CharField(max_length=30, help_text="Topic of the test")
-    subject = models.CharField(max_length=30, help_text="Subject of the test")
+    topic = models.CharField(max_length=100, help_text="Topic of the test")
+    subject = models.CharField(max_length=100, help_text="Subject of the test")
     active = models.BooleanField(default=False, help_text="Is the test active?")
     done = models.BooleanField(default=False, help_text="Is the test taken?")
+    
+    start_time = models.DateTimeField(null=True, blank=True, help_text="Start time of the test")
+    end_time = models.DateTimeField(null=True, blank=True, help_text="End time of the test")
 
     def __str__(self):
         return f"{self.subject} - {self.topic} ({'Active' if self.active else 'Inactive'})"
+
+    # Helper method to calculate remaining time
+    def get_remaining_time(self):
+        if self.end_time:
+            remaining_time = self.end_time - timezone.now()
+            return max(remaining_time, timezone.timedelta(0))  # Ensure we don't return negative time
+        return timezone.timedelta(0)
 
 # The QuestionAttempt model logs each user's interaction with a question during a test, including time taken, difficulty level, and whether the answer was correct.
 # It provides detailed data for analyzing individual question attempts and helps monitor live performance.

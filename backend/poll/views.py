@@ -1,4 +1,5 @@
 from decimal import Decimal
+from datetime import timedelta
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.core.exceptions import ObjectDoesNotExist
@@ -8,6 +9,7 @@ from rest_framework.decorators import permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from django.http import JsonResponse
 from .models import *
+from datetime import datetime, timedelta 
 from .models import Test
 from .serializers import QuestionSerializer, RatingSerializer, CommentSerializer
 
@@ -222,29 +224,87 @@ def create_test(request):
     return JsonResponse({"message": "Test created successfully", "test_id": test.id}, status=201)
 
 # for test dashboard for admin. # Returns a list of all tests with basic information.
+
 @view(['GET'])
 @permission_classes([IsAdminUser])
 def fetch_tests(request):
-    tests = Test.objects.all()  # Fetch all test records
-    test_data = [{"id": test.id, "subject": test.subject, "topic": test.topic, "active": test.active} for test in tests]
-    
-    return JsonResponse(test_data, safe=False, status=200)
+    try:
+        tests = Test.objects.all()  # Fetch all test records
+        test_data = []
 
+        for test in tests:
+            test_info = {
+                "id": test.id,
+                "subject": test.subject,
+                "topic": test.topic,
+                "active": test.active,
+            }
+
+            # If the test is active, calculate the remaining time
+            if test.active:
+                if test.start_time:  # Check if the test has been started
+                    end_time = test.start_time + timedelta(minutes=test.duration)
+                    remaining_time = end_time - timezone.now()
+                    
+                    # Check if the remaining time is less than or equal to zero
+                    if remaining_time.total_seconds() <= 0:
+                        # Stop the test if the time has expired
+                        test.active = False
+                        test.save()  # Save the test state
+                        test_info["remaining_time"] = {"minutes": 0, "seconds": 0}
+                    else:
+                        # Convert remaining time to minutes and seconds
+                        minutes, seconds = divmod(int(remaining_time.total_seconds()), 60)
+                        test_info["remaining_time"] = {"minutes": minutes, "seconds": seconds}
+                else:
+                    # If the test hasn't been started, set remaining time based on duration
+                    test_info["remaining_time"] = {"minutes": test.duration, "seconds": 0}
+            else:
+                # If not active, set remaining_time to None
+                test_info["remaining_time"] = None
+
+            test_data.append(test_info)
+
+        return JsonResponse(test_data, safe=False, status=200)
+
+    except Exception as e:
+        print(f"Error fetching tests: {str(e)}")
+        return JsonResponse({"error": "An error occurred while fetching tests."}, status=500)
 # # API to start a test by setting its active status to True.
 # Once active, students can begin taking the test.
 @view(['POST'])
-@permission_classes([IsAdminUser])  # Can be restricted to Admin or Teachers
+@permission_classes([IsAdminUser])
 def start_test(request, test_id):
     try:
         test = Test.objects.get(id=test_id)
         if test.active:
             return JsonResponse({"message": "Test is already active"}, status=400)
 
-        test.active = True
+        test.start_time = timezone.now()
+        test.end_time = test.start_time + timedelta(minutes=test.duration)  # Calculate end time
         test.active = True
         test.save()
 
-        return JsonResponse({"message": f"Test {test_id} started successfully"}, status=200)
+        return JsonResponse({"message": f"Test {test_id} started successfully", "end_time": test.end_time}, status=200)
+
+    except Test.DoesNotExist:
+        return JsonResponse({"error": "Test not found"}, status=404)
+    
+
+@view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_remaining_time(request, test_id):
+    try:
+        test = Test.objects.get(id=test_id)
+        remaining_time = test.get_remaining_time()
+
+        # Return remaining time in minutes and seconds
+        return JsonResponse({
+            "remaining_time": {
+                "minutes": remaining_time.seconds // 60,
+                "seconds": remaining_time.seconds % 60
+            }
+        }, status=200)
 
     except Test.DoesNotExist:
         return JsonResponse({"error": "Test not found"}, status=404)

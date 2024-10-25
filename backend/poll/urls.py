@@ -37,4 +37,5 @@ urlpatterns = [
     # Monitoring
     path('test/<int:test_id>/monitor/', monitor_test, name='monitor_test'),
     path('test/<int:user_id>/<int:test_id>/stats/', student_stats, name='student_stats'),
+    path('test/<int:test_id>/time/', get_remaining_time, name='fetch_time')
 ]
