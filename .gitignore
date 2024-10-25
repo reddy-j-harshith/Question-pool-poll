@@ -1,8 +1,2 @@
-backend/backend/__pycache__/settings.cpython-310.pyc
-backend/backend/__pycache__/urls.cpython-310.pyc
-backend/poll/__pycache__/__init__.cpython-310.pyc
-backend/poll/__pycache__/admin.cpython-310.pyc
-backend/poll/__pycache__/apps.cpython-310.pyc
-backend/poll/__pycache__/models.cpython-310.pyc
-backend/poll/migrations/__pycache__/__init__.cpython-310.pyc
-backend/backend/__pycache__/settings.cpython-310.pyc
+backend/backend/__pycache__/
+backend/poll/__pycache__/
