@@ -1,0 +1,125 @@
+/* Overall page container */
+.question-page-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f8f9fa; /* Subtle background */
+    font-family: 'Poppins', sans-serif; /* Modern font */
+    color: #333; /* Professional dark color */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Soft shadow */
+  }
+  
+  /* Question Title */
+  .question-title {
+    font-size: 2rem;
+    color: #007bff; /* LeetCode-like blue */
+    margin-bottom: 20px;
+    font-weight: bold;
+  }
+  
+  /* Description Section */
+  .description-section {
+    margin-bottom: 30px;
+  }
+  
+  .description-section h2 {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 10px;
+  }
+  
+  /* Updated Description Section */
+.description-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  font-size: 1.2rem;
+  line-height: 1.5;
+  max-height: 300px; /* Limit the height */
+  overflow-y: auto; /* Scroll when content exceeds the height */
+  white-space: pre-wrap; /* Preserve formatting for long text */
+  word-wrap: break-word; /* Ensure text wraps properly */
+}
+  
+  /* Options Section */
+  .options-section {
+    margin-bottom: 30px;
+  }
+  
+  .options-section h2 {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 10px;
+  }
+  
+  .option-container {
+    background-color: #f4f4f4;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #555;
+  }
+  
+  .option-container:hover {
+    background-color: #e8e8e8;
+    cursor: pointer;
+  }
+  
+  /* Correct Answer Section */
+  .correct-answer-section {
+    font-size: 1.2rem;
+    color: #28a745; /* Green to highlight correct answer */
+    background-color: #f9f9f9;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    font-weight: bold;
+  }
+  
+  /* Actions Section (Comment and Review buttons) */
+  .actions-section {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .comment-button, .star-button {
+    background-color: #007bff; /* LeetCode-like blue */
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  
+  .comment-button:hover, .star-button:hover {
+    background-color: #0056b3;
+  }
+  
+  .star-button {
+    background-color: #f39c12; /* Gold for review/star */
+  }
+  
+  .star-button:hover {
+    background-color: #d35400;
+  }
+  /* Previous/Next Button Styles */
+.prev-next-button {
+  background-color: #007bff; /* LeetCode-like blue */
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  margin-left: 10px; /* Add some spacing */
+}
+
+.prev-next-button:hover {
+  background-color: #0056b3;
+}
